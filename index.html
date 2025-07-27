@@ -72,7 +72,6 @@
       <button type="submit">Login</button>
     </form>
     <div style="margin-top:20px;font-size:.97em;color:#666;text-align:center;">
-      <b>Demo akun:</b> <br> budi / budi123 <br> siti / siti123
     </div>
   </div>
 
@@ -110,9 +109,9 @@
     const users = [
       { username: 'Joka Munir', password: 'Joka2004' },
       { username: 'Fathul Salbani', password: 'Fathul22' },
-      { username: 'Nur Izzati Kharisma', password:'Kharisma06'}  ];
-    
-    let loggedInUser = null;
+      { username: 'Nur Izzati Kharisma', password:'Kharisma06'}  
+    ];
+        let loggedInUser = null;
     let absensi = JSON.parse(localStorage.getItem('absensi') || '[]');
 
     // Animasi notifikasi
