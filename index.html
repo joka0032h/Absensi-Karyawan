@@ -2,10 +2,10 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Aplikasi Absensi Karyawan Modern</title>
+  <title>Aplikasi Absensi Karyawan</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; padding: 0; margin: 0; background: #f7fafc;}
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafc; }
     .container { max-width: 400px; margin: 40px auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 15px #bbb5; padding: 24px; }
     h2 { text-align: center; margin-bottom: 18px;}
     .form-group { margin-bottom: 12px;}
@@ -51,12 +51,15 @@
       font-weight: 500;
       letter-spacing: .5px;
     }
+    .absen-summary {margin-top: 28px;}
+    .absen-summary h4 {margin-bottom: 8px; margin-top: 15px;}
+    .absen-summary ul {background: #f2f8ff; border-radius: 6px; padding: 10px 16px; margin: 0 0 8px 0;}
+    .absen-summary li {margin-bottom: 2px;}
   </style>
 </head>
 <body>
   <div class="notif" id="notif"></div>
   <div class="container fade" id="loginSection">
-    <!-- Gambar/logo di sini -->
     <img src="c:\Users\User\Documents\FT Q\My ftoo aing\IMG-20241112-WA0092.jpg"  alt="Logo Absensi" class="logo-img">
     <div class="caption">Aplikasi Absensi Karyawan</div>
     <h2>Login</h2>
@@ -76,8 +79,6 @@
   </div>
 
   <div class="container fade" id="mainSection" style="display:none;">
-    <!-- Gambar/logo juga bisa di sini jika mau -->
-    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Logo Absensi" class="logo-img">
     <div class="caption">Aplikasi Absensi Karyawan</div>
     <div id="welcome"></div>
     <div class="button-group">
@@ -102,18 +103,30 @@
         <!-- Data absensi akan muncul di sini -->
       </tbody>
     </table>
+    <!-- Bagian menampilkan siapa yang sudah dan belum absen hari ini -->
+    <div class="absen-summary">
+      <h4>Yang Sudah Absen Masuk Hari Ini</h4>
+      <ul id="sudahAbsenList"></ul>
+      <h4>Yang Belum Absen Masuk Hari Ini</h4>
+      <ul id="belumAbsenList"></ul>
+    </div>
   </div>
 
   <script>
     // Demo user
     const users = [
-      { username: 'Joka Munir', password: 'Joka2004' },
+{ username: 'Joka Munir', password: 'Joka2004' },
       { username: 'Fathul Salbani', password: 'Fathul22' },
-      { username: 'Nur Izzati Kharisma', password:'Kharisma06'}  ];
+      { username: 'Nur Izzati Kharisma', password:'Kharisma06'}, 
+      { username: 'Sujoko', password:'sujoko06'}, 
+      { username: 'Rizki Maulana', password:'Rizki2004'}, 
+      { username: 'chyarra andara hairani', password:'chyara2004'}, 
+      { username: 'Fathul Fathurrahman', password:'Fathul200' },
+  ];
+  
     let loggedInUser = null;
     let absensi = JSON.parse(localStorage.getItem('absensi') || '[]');
 
-    // Animasi notifikasi
     function showNotif(msg, type='info', timeout=1800) {
       const n = document.getElementById('notif');
       n.innerText = msg;
@@ -122,7 +135,6 @@
       setTimeout(() => { n.className = 'notif'; }, timeout);
     }
 
-    // Login section
     function showLogin() {
       document.getElementById('loginSection').style.display = '';
       document.getElementById('mainSection').style.display = 'none';
@@ -138,6 +150,7 @@
       document.getElementById('mainSection').classList.add('fade');
       document.getElementById('loginSection').classList.remove('fade');
       tampilkanAbsensi();
+      tampilkanStatusAbsen();
     }
 
     document.getElementById('loginForm').onsubmit = function(e) {
@@ -160,7 +173,6 @@
       showNotif("Logout berhasil", "info",1100);
     };
 
-    // Absen
     function absen(tipe) {
       if (!loggedInUser) {
         showNotif("Anda belum login!", "error",1500);
@@ -191,9 +203,9 @@
       }
       localStorage.setItem('absensi', JSON.stringify(absensi));
       tampilkanAbsensi();
+      tampilkanStatusAbsen();
     }
 
-    // Tabel absensi
     function tampilkanAbsensi() {
       const tbody = document.querySelector('#tabelAbsensi tbody');
       tbody.innerHTML = '';
@@ -209,7 +221,39 @@
       });
     }
 
-    // Export CSV
+    function tampilkanStatusAbsen() {
+      const tgl = new Date().toISOString().slice(0, 10);
+      // User yang sudah absen hari ini
+      const sudahAbsen = absensi.filter(a => a.tgl === tgl).map(a => a.username);
+      // Tampilkan yang sudah absen
+      const ulSudah = document.getElementById('sudahAbsenList');
+      ulSudah.innerHTML = '';
+      if (sudahAbsen.length === 0) {
+        ulSudah.innerHTML = '<li><i>Belum ada yang absen</i></li>';
+      } else {
+        users.forEach(u => {
+          if (sudahAbsen.includes(u.username)) {
+            const li = document.createElement('li');
+            li.textContent = u.username;
+            ulSudah.appendChild(li);
+          }
+        });
+      }
+      // User yang belum absen hari ini
+      const belumAbsen = users.map(u => u.username).filter(nama => !sudahAbsen.includes(nama));
+      const ulBelum = document.getElementById('belumAbsenList');
+      ulBelum.innerHTML = '';
+      if (belumAbsen.length === 0) {
+        ulBelum.innerHTML = '<li><i>Semua sudah absen</i></li>';
+      } else {
+        belumAbsen.forEach(nama => {
+          const li = document.createElement('li');
+          li.textContent = nama;
+          ulBelum.appendChild(li);
+        });
+      }
+    }
+
     function exportCSV() {
       if (absensi.length === 0) {
         showNotif("Data absensi kosong!", "error");
@@ -228,7 +272,6 @@
       showNotif("Data absensi diexport!", "info",1400);
     }
 
-    // Inisialisasi: Tampilkan login form
     window.onload = function() {
       showLogin();
     };
